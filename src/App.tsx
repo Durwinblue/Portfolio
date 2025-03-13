@@ -664,7 +664,7 @@ function App() {
               <div className="space-y-2">
                 <a href="natearabcyp@gmail.com" className="flex items-center gap-2 text-white/80 hover:text-[#9ef01a] transition-colors">
                   <Mail size={16} />
-                  contact@example.com
+                  natearabcyp@gmail.com
                 </a>
                 <p className="text-white/60">Famagusta, Cyprus</p>
               </div>
