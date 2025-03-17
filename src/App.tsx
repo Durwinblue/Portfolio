@@ -1,10 +1,40 @@
 import React from 'react';
 import { Menu, X, Download, ExternalLink, Mail, Linkedin, Github, Twitter, Phone, MapPin, Calendar, User, Code, Briefcase, FileText, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { supabase } from './supabaseClient';
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  // Test Supabase connection
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*')
+          .limit(1);
+        
+        if (error) {
+          console.error('Supabase connection error:', error);
+        } else {
+          console.log('Supabase connection successful');
+        }
+      } catch (error) {
+        console.error('Supabase connection test failed:', error);
+      }
+    };
+
+    testConnection();
+  }, []);
 
   // Handle scroll events for animations
   useEffect(() => {
@@ -37,6 +67,56 @@ function App() {
     const element = document.getElementById(id);
     element?.scrollIntoView({ behavior: 'smooth' });
     setIsMenuOpen(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormStatus('loading');
+
+    // Log the data being sent
+    console.log('Submitting form data:', formData);
+
+    try {
+      // Validate data before sending
+      if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+        throw new Error('All fields are required');
+      }
+
+      const { data, error } = await supabase
+        .from('messages')
+        .insert([{
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject.trim(),
+          message: formData.message.trim()
+        }])
+        .select();
+
+      if (error) {
+        console.error('Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+
+      console.log('Success response:', data);
+      setFormStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      setFormStatus('error');
+      console.error('Detailed error:', error);
+    }
   };
 
   return (
@@ -598,15 +678,19 @@ function App() {
             <div className="bg-white/5 p-8 rounded-lg backdrop-blur-sm animate-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-300">
               <h3 className="text-2xl font-bold text-[#9ef01a] mb-6">Send Me a Message</h3>
               
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-white mb-2">Name</label>
                     <input 
                       type="text" 
                       id="name" 
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       className="w-full bg-white/10 border border-white/20 rounded-md px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:border-[#9ef01a]"
                       placeholder="Your Name"
+                      required
                     />
                   </div>
                   
@@ -615,8 +699,12 @@ function App() {
                     <input 
                       type="email" 
                       id="email" 
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       className="w-full bg-white/10 border border-white/20 rounded-md px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:border-[#9ef01a]"
                       placeholder="Your Email"
+                      required
                     />
                   </div>
                 </div>
@@ -626,8 +714,12 @@ function App() {
                   <input 
                     type="text" 
                     id="subject" 
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
                     className="w-full bg-white/10 border border-white/20 rounded-md px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:border-[#9ef01a]"
                     placeholder="Subject"
+                    required
                   />
                 </div>
                 
@@ -635,23 +727,36 @@ function App() {
                   <label htmlFor="message" className="block text-white mb-2">Message</label>
                   <textarea 
                     id="message" 
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
                     rows={5}
                     className="w-full bg-white/10 border border-white/20 rounded-md px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:border-[#9ef01a]"
                     placeholder="Your Message"
+                    required
                   ></textarea>
                 </div>
                 
                 <button 
                   type="submit"
-                  className="flex items-center gap-2 bg-[#9ef01a] text-black px-6 py-3 rounded-md hover:bg-[#8ad00a] transition-colors font-medium group"
+                  disabled={formStatus === 'loading'}
+                  className="flex items-center gap-2 bg-[#9ef01a] text-black px-6 py-3 rounded-md hover:bg-[#8ad00a] transition-colors font-medium group disabled:opacity-50"
                 >
                   <Send size={20} className="group-hover:translate-x-1 transition-transform" />
-                  Send Message
+                  {formStatus === 'loading' ? 'Sending...' : 'Send Message'}
                 </button>
+
+                {formStatus === 'success' && (
+                  <p className="text-green-500">Message sent successfully!</p>
+                )}
+                {formStatus === 'error' && (
+                  <p className="text-red-500">Failed to send message. Please try again.</p>
+                )}
               </form>
             </div>
           </div>
         </div>
+        
       </section>
 
       {/* Footer */}
@@ -715,7 +820,7 @@ function App() {
       </footer>
 
       {/* Add CSS for animations */}
-      <style jsx="true">{`
+      <style>{`
         .animate-on-scroll {
           opacity: 0;
           transform: translateY(20px);
