@@ -12,6 +12,7 @@ function App() {
     message: ''
   });
   const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [skillsAnimated, setSkillsAnimated] = useState(false);
 
   // Test Supabase connection
   useEffect(() => {
@@ -60,6 +61,11 @@ function App() {
     handleScroll();
     
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSkillsAnimated(true), 250);
+    return () => clearTimeout(timer);
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -178,6 +184,48 @@ function App() {
     }
   ];
 
+  const skillCategories = [
+    {
+      title: 'Technical Skills',
+      icon: Settings,
+      emoji: '⚙️',
+      skills: [
+        { name: 'Python', level: 90 },
+        { name: 'JavaScript', level: 85 },
+        { name: 'HTML/CSS', level: 85 },
+        { name: 'React.js', level: 80 },
+        { name: 'SQL & Databases', level: 75 },
+        { name: 'Git & GitHub', level: 80 }
+      ]
+    },
+    {
+      title: 'AI & Data Skills',
+      icon: Brain,
+      emoji: '🤖',
+      skills: [
+        { name: 'Machine Learning (basics)', level: 80 },
+        { name: 'Data Analysis (Pandas, NumPy)', level: 85 },
+        { name: 'Data Visualization (Matplotlib, Seaborn)', level: 80 },
+        { name: 'Jupyter Notebooks', level: 90 },
+        { name: 'TensorFlow / PyTorch (beginner)', level: 60 },
+        { name: 'Kaggle / Colab', level: 85 }
+      ]
+    },
+    {
+      title: 'Soft Skills',
+      icon: Sparkles,
+      emoji: '💡',
+      skills: [
+        { name: 'Problem Solving', level: 95 },
+        { name: 'Curiosity & Research', level: 90 },
+        { name: 'Communication', level: 85 },
+        { name: 'Time Management', level: 85 },
+        { name: 'Adaptability', level: 90 },
+        { name: 'Collaboration', level: 80 }
+      ]
+    }
+  ];
+
   return (
     <div className="bg-black min-h-screen text-white">
       {/* Navigation */}
@@ -267,8 +315,8 @@ function App() {
             <div className="relative animate-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-300">
               <div className="absolute -inset-4 border border-[#9ef01a]/20 rounded-lg transform rotate-3"></div>
               <img
-                src="https://d2ylp2v14p0sub.cloudfront.net/openai-user/base_images/4efef6d4-feb7-41bd-939b-4209df539586/5387d44c-4a8e-4d13-9449-4d3c0a61c19a.png"
-                alt="Negin Arabzadeh"
+                src="/images/about-photo.jpg"
+                alt="Negin Arabzadeh smiling outdoors"
                 className="rounded-lg w-full h-auto relative z-10"
               />
             </div>
@@ -322,101 +370,47 @@ function App() {
           <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center animate-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out">Skills</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Technical Skills */}
-            <div className="bg-white/5 p-8 rounded-lg backdrop-blur-sm hover:bg-white/10 transition-colors animate-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out">
-              <h3 className="text-2xl font-bold mb-6 text-[#9ef01a] flex items-center gap-3">
-                <Settings size={24} />
-                <span>⚙️ Technical Skills</span>
-              </h3>
+            {skillCategories.map((category, index) => {
+              const Icon = category.icon;
+              return (
+                <div
+                  key={category.title}
+                  className="group relative overflow-hidden bg-white/5 border border-white/5 p-8 rounded-2xl backdrop-blur-sm hover:border-[#9ef01a]/60 transition-all duration-500 animate-on-scroll opacity-0 translate-y-10"
+                  style={{ transitionDelay: `${index * 150}ms` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#9ef01a]/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3 text-[#9ef01a]">
+                        <Icon size={24} />
+                        <span className="text-2xl font-bold">{`${category.emoji} ${category.title}`}</span>
+                      </div>
+                      <span className="text-white/40 text-xs uppercase tracking-[0.4em]">Level</span>
+                    </div>
 
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 text-xs uppercase tracking-[0.2em] text-white/50 pb-2 border-b border-white/10">
-                  <span>Skill</span>
-                  <span className="text-right">Level</span>
-                </div>
-                {[
-                  { name: 'Python', level: '90%' },
-                  { name: 'JavaScript', level: '85%' },
-                  { name: 'HTML/CSS', level: '85%' },
-                  { name: 'React.js', level: '80%' },
-                  { name: 'SQL & Databases', level: '75%' },
-                  { name: 'Git & GitHub', level: '80%' },
-                ].map((skill) => (
-                  <div
-                    key={skill.name}
-                    className="grid grid-cols-2 items-center py-2 border-b border-white/5 last:border-b-0"
-                  >
-                    <span className="text-white font-medium">{skill.name}</span>
-                    <span className="text-white/70 text-right">{skill.level}</span>
+                    <div className="space-y-6">
+                      {category.skills.map((skill, skillIndex) => (
+                        <div key={skill.name} className="group">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-white font-semibold">{skill.name}</span>
+                            <span className="text-white/70 text-sm">{skill.level}%</span>
+                          </div>
+                          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-[#9ef01a] via-lime-300 to-emerald-400 shadow-[0_0_15px_rgba(158,240,26,0.4)] transition-all duration-1000 ease-out"
+                              style={{
+                                width: skillsAnimated ? `${skill.level}%` : '0%',
+                                transitionDelay: `${skillIndex * 120}ms`
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
-              <p className="text-sm text-white/60 mt-4">(Focus: solid web foundations + core Python &amp; data skills)</p>
-            </div>
-
-            {/* AI & Data Skills */}
-            <div className="bg-white/5 p-8 rounded-lg backdrop-blur-sm hover:bg-white/10 transition-colors animate-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-200">
-              <h3 className="text-2xl font-bold mb-6 text-[#9ef01a] flex items-center gap-3">
-                <Brain size={24} />
-                <span>🤖 AI &amp; Data Skills</span>
-              </h3>
-
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 text-xs uppercase tracking-[0.2em] text-white/50 pb-2 border-b border-white/10">
-                  <span>Skill</span>
-                  <span className="text-right">Level</span>
                 </div>
-                {[
-                  { name: 'Machine Learning (basics)', level: '80%' },
-                  { name: 'Data Analysis (Pandas, NumPy)', level: '85%' },
-                  { name: 'Data Visualization (Matplotlib, Seaborn)', level: '80%' },
-                  { name: 'Jupyter Notebooks', level: '90%' },
-                  { name: 'TensorFlow / PyTorch (beginner)', level: '60%' },
-                  { name: 'Kaggle / Colab', level: '85%' },
-                ].map((skill) => (
-                  <div
-                    key={skill.name}
-                    className="grid grid-cols-2 items-center py-2 border-b border-white/5 last:border-b-0"
-                  >
-                    <span className="text-white font-medium">{skill.name}</span>
-                    <span className="text-white/70 text-right">{skill.level}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-white/60 mt-4">(Focus: shows growing strength in Python for AI and familiar tools for learning &amp; experimentation)</p>
-            </div>
-
-            {/* Soft Skills */}
-            <div className="bg-white/5 p-8 rounded-lg backdrop-blur-sm hover:bg-white/10 transition-colors animate-on-scroll opacity-0 translate-y-10 transition-all duration-1000 ease-out delay-400">
-              <h3 className="text-2xl font-bold mb-6 text-[#9ef01a] flex items-center gap-3">
-                <Sparkles size={24} />
-                <span>💡 Soft Skills</span>
-              </h3>
-
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 text-xs uppercase tracking-[0.2em] text-white/50 pb-2 border-b border-white/10">
-                  <span>Skill</span>
-                  <span className="text-right">Level</span>
-                </div>
-                {[
-                  { name: 'Problem Solving', level: '95%' },
-                  { name: 'Curiosity & Research', level: '90%' },
-                  { name: 'Communication', level: '85%' },
-                  { name: 'Time Management', level: '85%' },
-                  { name: 'Adaptability', level: '90%' },
-                  { name: 'Collaboration', level: '80%' },
-                ].map((skill) => (
-                  <div
-                    key={skill.name}
-                    className="grid grid-cols-2 items-center py-2 border-b border-white/5 last:border-b-0"
-                  >
-                    <span className="text-white font-medium">{skill.name}</span>
-                    <span className="text-white/70 text-right">{skill.level}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-white/60 mt-4">(Focus: personal traits that matter in both research and team-based tech work)</p>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -573,21 +567,21 @@ function App() {
             {[
               {
                 title: 'MediWise Scheduler',
-                image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80',
+                image: '/images/mediwise.jpg',
                 description: 'Smart appointment scheduling for healthcare teams with automated reminders and role-based dashboards.',
                 technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Supabase'],
                 link: 'https://mediwise-scheduler.vercel.app/'
               },
               {
                 title: 'Emoji Mood Maker',
-                image: 'https://images.unsplash.com/photo-1528137871618-79d2761e3fd5?auto=format&fit=crop&w=1600&q=80',
+                image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
                 description: 'Playful emoji-powered mood board that generates animated gradients based on your current vibe.',
                 technologies: ['Vercel v0', 'React', 'Framer Motion'],
                 link: 'https://v0-emoji-mood-maker.vercel.app/'
               },
               {
                 title: 'Verto Car Rental Platform',
-                image: 'https://images.unsplash.com/photo-1542281286-9e0a16bb7366?auto=format&fit=crop&w=1600&q=80',
+                image: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1600&q=80',
                 description: 'Graduation capstone project delivering booking flows, fleet management, and customer dashboards for a local rental brand.',
                 technologies: ['PHP', 'MySQL', 'SCSS', 'jQuery'],
                 link: '/downloads/verto-project.zip',
@@ -595,11 +589,53 @@ function App() {
               },
               {
                 title: 'Flavoro Online Restaurant',
-                image: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=1600&q=80',
+                image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80',
                 description: 'University team build showcasing a digital dining experience with interactive menu browsing and checkout.',
                 technologies: ['PHP', 'MySQL', 'Alpine.js', 'Sass'],
                 link: '/downloads/flavoro-restaurant-project.zip',
                 download: 'flavoro-restaurant-project.zip'
+              },
+              {
+                title: 'Iman Serene Guide',
+                image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1600&q=80',
+                description: 'Calming lifestyle companion that curates mindfulness itineraries, breathing exercises, and reflection prompts.',
+                technologies: ['Next.js', 'Tailwind CSS', 'TypeScript'],
+                link: 'https://iman-tawny.vercel.app/'
+              },
+              {
+                title: 'Puppia Paws Paradise',
+                image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1600&q=80',
+                description: 'Pet adoption and boutique experience with curated collections for dogs and playful onboarding flows.',
+                technologies: ['React', 'Tailwind CSS', 'Firebase'],
+                link: 'https://puppia-paws-paradise.vercel.app/'
+              },
+              {
+                title: 'Miray Luxury Stay',
+                image: '/images/miray.jpg',
+                description: 'High-end hospitality platform highlighting suites, concierge services, and immersive booking journeys.',
+                technologies: ['Next.js', 'Styled Components', 'Contentful'],
+                link: 'https://miray-luxury-stay.vercel.app/'
+              },
+              {
+                title: 'Karpaz Luxury Escape',
+                image: 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?auto=format&fit=crop&w=1600&q=80',
+                description: 'Boutique resort concept inspired by Karpaz coastlines, featuring suite previews, amenities, and curated travel tips.',
+                technologies: ['Next.js', 'Tailwind CSS', 'Supabase'],
+                link: 'https://karpaz-luxury-escape.vercel.app/'
+              },
+              {
+                title: 'Sea Life Hotel Glow',
+                image: '/images/sealife.jpg',
+                description: 'Coastal resort microsite celebrating Mediterranean nights with glowing visuals, amenities, and quick booking CTAs.',
+                technologies: ['Next.js', 'Tailwind CSS', 'GSAP'],
+                link: 'https://sea-life-hotel-glow.vercel.app/'
+              },
+              {
+                title: 'Ticket — Event Manager',
+                image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80',
+                description: 'Event ticketing dashboard for publishing shows, tracking inventory, and sharing QR-ready passes.',
+                technologies: ['React', 'Node.js', 'MongoDB'],
+                link: 'https://seatlytic.vercel.app/'
               }
             ].map((project, index) => (
               <div
@@ -861,7 +897,7 @@ function App() {
             <div>
               <h3 className="text-[#9ef01a] font-bold text-lg mb-4">Legal</h3>
               <div className="space-y-2 text-white/60">
-                <p>© 2024 Negin Arabzadeh</p>
+                <p>© 2026 Negin Arabzadeh</p>
                 <p>All rights reserved</p>
               </div>
             </div>
